@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Longshi Cloud",
+        "description": "Sign in to discover Longshi Cloud recording devices.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "region": "Cloud region",
+          "zone": "Country calling code (optional)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to Longshi Cloud",
+      "invalid_auth": "Invalid username or password",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This account is already configured"
+    }
+  }
+}

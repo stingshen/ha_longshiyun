@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*.zip
+.DS_Store
+.ruff_cache/
+.pytest_cache/
+.venv/
+venv/

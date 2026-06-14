@@ -1,0 +1,13 @@
+{
+  "domain": "longshi_cloud",
+  "name": "Longshi Cloud",
+  "codeowners": [],
+  "config_flow": true,
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "requirements": [
+    "pycryptodome>=3.15",
+    "websockets>=10"
+  ],
+  "version": "0.1.0"
+}
