@@ -112,6 +112,79 @@ mode: single
 
 自动化时间使用 Home Assistant 配置的时区。
 
+## 为设备创建独立侧边栏
+
+可以为每台龙势云设备创建一个单独的 Home Assistant 仪表盘，并将它固定在侧边栏。
+以下示例为 `double` 设备创建侧边栏页面。
+
+### 使用 Home Assistant 界面创建
+
+1. 打开 **设置 > 仪表盘**。
+2. 点击右下角 **添加仪表盘**。
+3. 名称填写 `Double 录音设备`，图标填写 `mdi:record-rec`。
+4. 确保启用 **在侧边栏中显示**，然后创建仪表盘。
+5. 打开新仪表盘，点击右上角菜单并选择 **编辑仪表盘**。
+6. 添加一个 **实体** 卡片，并加入该设备的以下实体：
+
+   - `binary_sensor.double_connectivity`
+   - `sensor.double_status`
+   - `select.double_recording_mode`
+   - `sensor.double_recording_mode_setting_state`
+   - `number.double_recording_sensitivity`
+   - `number.double_recording_volume`
+   - `sensor.double_recording_schedule`
+
+实际实体 ID 由设备名称生成。请先在 **设置 > 设备与服务 > 实体** 中搜索设备名称并
+确认实体 ID。
+
+### 使用 YAML 创建
+
+在 `/config/configuration.yaml` 中加入：
+
+```yaml
+lovelace:
+  mode: storage
+  dashboards:
+    lovelace-double:
+      mode: yaml
+      title: Double 录音设备
+      icon: mdi:record-rec
+      show_in_sidebar: true
+      filename: double-dashboard.yaml
+```
+
+然后创建 `/config/double-dashboard.yaml`：
+
+```yaml
+title: Double 录音设备
+views:
+  - title: 录音控制
+    path: recording
+    icon: mdi:record-rec
+    cards:
+      - type: entities
+        title: Double
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.double_connectivity
+            name: 连接状态
+          - entity: sensor.double_status
+            name: 设备状态
+          - entity: select.double_recording_mode
+            name: 录音模式
+          - entity: sensor.double_recording_mode_setting_state
+            name: 模式设置状态
+          - entity: number.double_recording_sensitivity
+            name: 录音灵敏度
+          - entity: number.double_recording_volume
+            name: 录音音量
+          - entity: sensor.double_recording_schedule
+            name: 录音计划
+```
+
+保存文件后重启 Home Assistant。侧边栏中会出现 **Double 录音设备**。为其他设备
+创建侧边栏时，复制此配置并替换仪表盘 ID、文件名和实体 ID。
+
 ## 区域设置
 
 | 区域值 | 账号服务器 | 默认国家区号 |
