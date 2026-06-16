@@ -16,8 +16,10 @@
 | Recording mode setting state | 传感器 | 显示模式设置进度、目标模式和错误；新选择会取消旧设置任务 |
 | Recording sensitivity | 数值 | 设置录音灵敏度，范围 `0-100` |
 | Recording volume | 数值 | 设置录音音量，范围 `0-100` |
+| Force refresh | 按钮 | 手动强制刷新龙势云设备状态 |
 
-集成每 60 秒刷新一次。Connectivity 和 Status 使用龙势云设备网关报告的在线状态。
+集成默认不自动刷新，只在启动、手动点击 Force refresh 或 Home Assistant 请求更新时刷新。
+可以在集成选项中设置自动刷新间隔。Connectivity 和 Status 使用龙势云设备网关报告的在线状态。
 设备在线但暂时没有响应控制会话时，设备仍显示在线，但控制实体会标记为不可用。
 录音模式、灵敏度和音量使用设备独立查询接口返回的实时值，不使用云端缓存值。
 录音模式设置状态为 `idle`、`setting`、`succeeded` 或 `failed`。如果设备仍在处理
@@ -64,6 +66,16 @@
 6. 输入龙势云用户名和密码。区域一般选择 `auto`；中国账号也可选择 `cn`。
 
 7. 提交后，Home Assistant 会自动发现账号中的所有设备。
+
+## 集成选项
+
+在 **设置 > 设备与服务 > Longshi Cloud > 配置** 中可以修改：
+
+- **Automatic refresh interval in seconds**：自动刷新间隔，单位为秒。
+- 填写 `0` 表示关闭自动刷新，这是默认值。
+
+自动刷新和 Force refresh 按钮只刷新设备状态，不会重置或覆盖 Recording mode setting
+state。正在切换录音模式时，设置状态仍保持 `setting`，直到设备确认成功或返回错误。
 
 ## 控制录音设备
 
@@ -133,6 +145,7 @@ mode: single
    - `number.double_recording_sensitivity`
    - `number.double_recording_volume`
    - `sensor.double_recording_schedule`
+   - `button.double_force_refresh`
 
 实际实体 ID 由设备名称生成。请先在 **设置 > 设备与服务 > 实体** 中搜索设备名称并
 确认实体 ID。
@@ -180,6 +193,8 @@ views:
             name: 录音音量
           - entity: sensor.double_recording_schedule
             name: 录音计划
+          - entity: button.double_force_refresh
+            name: 手动刷新
 ```
 
 保存文件后重启 Home Assistant。侧边栏中会出现 **Double 录音设备**。为其他设备

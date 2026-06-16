@@ -20,5 +20,16 @@
     "abort": {
       "already_configured": "该账号已经配置"
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "龙势云选项",
+        "description": "设置自动刷新间隔。填写 0 表示关闭自动刷新。",
+        "data": {
+          "refresh_interval": "自动刷新间隔（秒）"
+        }
+      }
+    }
   }
 }

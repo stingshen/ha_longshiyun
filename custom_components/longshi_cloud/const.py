@@ -5,12 +5,13 @@ from __future__ import annotations
 DOMAIN = "longshi_cloud"
 CONF_REGION = "region"
 CONF_ZONE = "zone"
+CONF_REFRESH_INTERVAL = "refresh_interval"
 
 DEFAULT_REGION = "auto"
-DEFAULT_UPDATE_INTERVAL = 60
+DEFAULT_REFRESH_INTERVAL = 0
 DEFAULT_TIMEOUT = 12
 
-PLATFORMS = ["binary_sensor", "sensor", "select", "number"]
+PLATFORMS = ["binary_sensor", "sensor", "select", "number", "button"]
 
 RECORD_MODES = {
     "0": "All Day",

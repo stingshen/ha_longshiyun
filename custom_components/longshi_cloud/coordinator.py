@@ -3,16 +3,18 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from contextlib import suppress
 from datetime import timedelta
 import logging
 from typing import Any
 
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import LongshiCloudClient, LongshiDevice, LongshiDeviceClient
-from .const import DEFAULT_UPDATE_INTERVAL, DOMAIN
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,13 +23,17 @@ class LongshiCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Coordinate cloud discovery and device polling."""
 
     def __init__(
-        self, hass: HomeAssistant, cloud: LongshiCloudClient, zone: int | None
+        self,
+        hass: HomeAssistant,
+        cloud: LongshiCloudClient,
+        zone: int | None,
+        refresh_interval: int,
     ):
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(seconds=DEFAULT_UPDATE_INTERVAL),
+            update_interval=None,
         )
         self.cloud = cloud
         self.zone = zone
@@ -35,6 +41,32 @@ class LongshiCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._record_mode_tasks: dict[str, asyncio.Task[None]] = {}
         self._record_mode_locks: dict[str, asyncio.Lock] = {}
         self._record_mode_setting: dict[str, dict[str, Any]] = {}
+        self._refresh_unsub: Callable[[], None] | None = None
+        self.set_refresh_interval(refresh_interval)
+
+    def set_refresh_interval(self, refresh_interval: int) -> None:
+        """Update the automatic refresh interval."""
+        self.shutdown_refresh_timer()
+        if refresh_interval > 0:
+            self._refresh_unsub = async_track_time_interval(
+                self.hass,
+                self._handle_interval_refresh,
+                timedelta(seconds=refresh_interval),
+            )
+
+    def shutdown_refresh_timer(self) -> None:
+        """Stop automatic refresh scheduling."""
+        if self._refresh_unsub is not None:
+            self._refresh_unsub()
+            self._refresh_unsub = None
+
+    @callback
+    def _handle_interval_refresh(self, _now) -> None:
+        """Refresh on the configured interval without disturbing setting tasks."""
+        if any(not task.done() for task in self._record_mode_tasks.values()):
+            _LOGGER.debug("Skipping automatic refresh while a setting task is running")
+            return
+        self.hass.async_create_task(self.async_request_refresh())
 
     async def _async_update_data(self) -> dict[str, Any]:
         try:

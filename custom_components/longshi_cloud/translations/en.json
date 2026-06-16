@@ -20,5 +20,16 @@
     "abort": {
       "already_configured": "This account is already configured"
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Longshi Cloud options",
+        "description": "Set the automatic refresh interval. Use 0 to disable automatic refresh.",
+        "data": {
+          "refresh_interval": "Automatic refresh interval in seconds"
+        }
+      }
+    }
   }
 }

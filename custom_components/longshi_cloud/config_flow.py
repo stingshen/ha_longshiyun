@@ -10,7 +10,15 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 
 from .api import LongshiAuthError, LongshiCloudClient, LongshiConnectionError
-from .const import CONF_REGION, CONF_ZONE, DEFAULT_REGION, DEFAULT_TIMEOUT, DOMAIN
+from .const import (
+    CONF_REFRESH_INTERVAL,
+    CONF_REGION,
+    CONF_ZONE,
+    DEFAULT_REFRESH_INTERVAL,
+    DEFAULT_REGION,
+    DEFAULT_TIMEOUT,
+    DOMAIN,
+)
 
 
 class LongshiConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -59,3 +67,32 @@ class LongshiConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+
+    @staticmethod
+    def async_get_options_flow(config_entry):
+        """Create the options flow."""
+        return LongshiOptionsFlow(config_entry)
+
+
+class LongshiOptionsFlow(config_entries.OptionsFlow):
+    """Handle Longshi Cloud options."""
+
+    def __init__(self, config_entry):
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input: dict[str, Any] | None = None):
+        """Manage options."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_REFRESH_INTERVAL,
+                    default=self.config_entry.options.get(
+                        CONF_REFRESH_INTERVAL, DEFAULT_REFRESH_INTERVAL
+                    ),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0)),
+            }
+        )
+        return self.async_show_form(step_id="init", data_schema=schema)
